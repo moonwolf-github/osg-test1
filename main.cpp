@@ -37,6 +37,8 @@
 
 #include <iostream>
 
+#include <osgDB/ReadFile>
+
 template<class T>
 class FindTopMostNodeOfTypeVisitor : public osg::NodeVisitor
 {
@@ -190,15 +192,53 @@ int main(int argc, char** argv)
     }
 
     // load the nodes from the commandline arguments.
-    osg::ref_ptr<osg::Node> rootnode = osgDB::readNodeFiles(arguments);
+    osg::ref_ptr<osg::Node> rootnode = new osg::Node;//osgDB::readNodeFiles(arguments);
 
     if (!rootnode)
     {
         osg::notify(osg::NOTICE)<<"Warning: no valid data loaded, please specify a database on the command line."<<std::endl;
         return 1;
     }
+    osg::Image* img = osgDB::readImageFile("terrain.png");
 
-    osg::ref_ptr<osgTerrain::Terrain> terrain = findTopMostNodeOfType<osgTerrain::Terrain>(rootnode.get());
+    osg::ref_ptr<osgTerrain::Locator> Locator1 = new osgTerrain::Locator;
+    Locator1->setCoordinateSystemType( osgTerrain::Locator::PROJECTED );
+    Locator1->setTransformAsExtents( 0.0, 0.0, 2560.0, 2560.0 );
+
+    osg::ref_ptr<osg::HeightField> heightmap1 = new osg::HeightField;
+    heightmap1 -> allocate(256,256);
+    heightmap1 -> setXInterval(10.0f);
+    heightmap1 -> setYInterval(10.0f);
+    for(int z=0; z<256; z++)
+    {
+        for(int x=0; x<256; x++)
+        {
+            heightmap1->setHeight( x, z, (float)*img->data( x, z ) );
+        }
+    }
+
+    osg::ref_ptr<osgTerrain::HeightFieldLayer> HeightFieldLayer1 = new osgTerrain::HeightFieldLayer( heightmap1.get() );
+    HeightFieldLayer1->setLocator( Locator1.get() );
+
+    osg::ref_ptr<osgTerrain::GeometryTechnique> GeometryTechnique1 = new osgTerrain::GeometryTechnique;
+    osg::ref_ptr<osgTerrain::TerrainTile> TerrainTile1 = new osgTerrain::TerrainTile;
+    TerrainTile1->setElevationLayer( HeightFieldLayer1.get() );
+    TerrainTile1->setTerrainTechnique( GeometryTechnique1.get() );
+
+    osg::ref_ptr<osgTerrain::Terrain> terrain = new osgTerrain::Terrain;
+    terrain->setSampleRatio( 1.0f );
+
+    //osg::ref_ptr<osg::Image> m_TextureImg = osgDB::readImageFile( _Texture );
+    //osg::ref_ptr<osg::Texture2D> m_Texture = new osg::Texture2D;
+    //m_Texture->setImage( m_TextureImg.get() );
+
+    osg::ref_ptr<osg::StateSet> m_TerrainStateSet = terrain -> getOrCreateStateSet();
+    //m_TerrainStateSet->setTextureAttributeAndModes( 0, m_Texture, osg::StateAttribute::ShockedN );
+    //m_TerrainStateSet->setMode( GL_LIGHTING, osg::StateAttribute::ShockedN );
+    m_TerrainStateSet->setAttribute( new osg::PolygonMode( osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE ) );
+
+    terrain -> addChild(TerrainTile1.get());
+    /*osg::ref_ptr<osgTerrain::Terrain> terrain = findTopMostNodeOfType<osgTerrain::Terrain>(rootnode.get());
     if (!terrain)
     {
         // no Terrain node present insert one above the loaded model.
@@ -220,7 +260,9 @@ int main(int argc, char** argv)
         }
 
         rootnode = terrain.get();
-    }
+    }*/
+
+    rootnode = terrain.get();
 
     terrain->setSampleRatio(sampleRatio);
     terrain->setVerticalScale(verticalScale);
