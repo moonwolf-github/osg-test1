@@ -191,14 +191,7 @@ int main(int argc, char** argv)
         else if (strBlendingPolicy == "ENABLE_BLENDING_WHEN_ALPHA_PRESENT") blendingPolicy = osgTerrain::TerrainTile::ENABLE_BLENDING_WHEN_ALPHA_PRESENT;
     }
 
-    // load the nodes from the commandline arguments.
-    osg::ref_ptr<osg::Node> rootnode = new osg::Node;//osgDB::readNodeFiles(arguments);
-
-    if (!rootnode)
-    {
-        osg::notify(osg::NOTICE)<<"Warning: no valid data loaded, please specify a database on the command line."<<std::endl;
-        return 1;
-    }
+    osg::ref_ptr<osg::Node> rootnode = new osg::Node;
     osg::Image* img = osgDB::readImageFile("terrain.png");
 
     osg::ref_ptr<osgTerrain::Locator> Locator1 = new osgTerrain::Locator;
@@ -232,35 +225,12 @@ int main(int argc, char** argv)
     //osg::ref_ptr<osg::Texture2D> m_Texture = new osg::Texture2D;
     //m_Texture->setImage( m_TextureImg.get() );
 
-    osg::ref_ptr<osg::StateSet> m_TerrainStateSet = terrain -> getOrCreateStateSet();
+    //osg::ref_ptr<osg::StateSet> m_TerrainStateSet = terrain -> getOrCreateStateSet();
     //m_TerrainStateSet->setTextureAttributeAndModes( 0, m_Texture, osg::StateAttribute::ShockedN );
     //m_TerrainStateSet->setMode( GL_LIGHTING, osg::StateAttribute::ShockedN );
-    m_TerrainStateSet->setAttribute( new osg::PolygonMode( osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE ) );
+    //m_TerrainStateSet->setAttribute( new osg::PolygonMode( osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE ) );
 
     terrain -> addChild(TerrainTile1.get());
-    /*osg::ref_ptr<osgTerrain::Terrain> terrain = findTopMostNodeOfType<osgTerrain::Terrain>(rootnode.get());
-    if (!terrain)
-    {
-        // no Terrain node present insert one above the loaded model.
-        terrain = new osgTerrain::Terrain;
-
-        // if CoordinateSystemNode is present copy it's contents into the Terrain, and discard it.
-        osg::CoordinateSystemNode* csn = findTopMostNodeOfType<osg::CoordinateSystemNode>(rootnode.get());
-        if (csn)
-        {
-            terrain->set(*csn);
-            for(unsigned int i=0; i<csn->getNumChildren();++i)
-            {
-                terrain->addChild(csn->getChild(i));
-            }
-        }
-        else
-        {
-            terrain->addChild(rootnode.get());
-        }
-
-        rootnode = terrain.get();
-    }*/
 
     rootnode = terrain.get();
 
@@ -273,7 +243,6 @@ int main(int argc, char** argv)
 
     // add a viewport to the viewer and attach the scene graph.
     viewer.setSceneData( rootnode.get() );
-
 
     // run the viewers main loop
     return viewer.run();
