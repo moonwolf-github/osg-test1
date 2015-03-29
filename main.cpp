@@ -215,26 +215,32 @@ int main(int argc, char** argv)
 
     osg::ref_ptr<osgTerrain::GeometryTechnique> GeometryTechnique1 = new osgTerrain::GeometryTechnique;
     osg::ref_ptr<osgTerrain::TerrainTile> TerrainTile1 = new osgTerrain::TerrainTile;
+
     TerrainTile1->setElevationLayer( HeightFieldLayer1.get() );
     TerrainTile1->setTerrainTechnique( GeometryTechnique1.get() );
 
     osg::ref_ptr<osgTerrain::Terrain> terrain = new osgTerrain::Terrain;
     terrain->setSampleRatio( 1.0f );
 
-    //osg::ref_ptr<osg::Image> m_TextureImg = osgDB::readImageFile( _Texture );
-    //osg::ref_ptr<osg::Texture2D> m_Texture = new osg::Texture2D;
-    //m_Texture->setImage( m_TextureImg.get() );
+    osg::ref_ptr<osg::Image> m_TextureImg = osgDB::readImageFile( "tex.png" );
+    osg::ref_ptr<osg::Texture2D> m_Texture = new osg::Texture2D;
+    m_Texture->setImage( m_TextureImg.get() );
 
-    //osg::ref_ptr<osg::StateSet> m_TerrainStateSet = terrain -> getOrCreateStateSet();
-    //m_TerrainStateSet->setTextureAttributeAndModes( 0, m_Texture, osg::StateAttribute::ShockedN );
-    //m_TerrainStateSet->setMode( GL_LIGHTING, osg::StateAttribute::ShockedN );
+    osg::ref_ptr<osg::StateSet> m_TerrainStateSet = terrain -> getOrCreateStateSet();
+    m_TerrainStateSet->setTextureAttributeAndModes( 0, m_Texture, osg::StateAttribute::ON );
+    m_TerrainStateSet->setMode( GL_LIGHTING, osg::StateAttribute::ON );
     //m_TerrainStateSet->setAttribute( new osg::PolygonMode( osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE ) );
 
     terrain -> addChild(TerrainTile1.get());
 
+    osg::ref_ptr<osgTerrain::ImageLayer> imageLayer = new osgTerrain::ImageLayer;
+    imageLayer->setImage(m_TextureImg.get());
+    //imageLayer->setLocator(Locator1.get());
+    TerrainTile1->setColorLayer(0, imageLayer.get());
+
     rootnode = terrain.get();
 
-    terrain->setSampleRatio(sampleRatio);
+    //terrain->setSampleRatio(sampleRatio);
     terrain->setVerticalScale(verticalScale);
     terrain->setBlendingPolicy(blendingPolicy);
 
