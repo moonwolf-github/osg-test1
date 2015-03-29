@@ -194,17 +194,20 @@ int main(int argc, char** argv)
     osg::ref_ptr<osg::Node> rootnode = new osg::Node;
     osg::Image* img = osgDB::readImageFile("terrain.png");
 
+    const int terrainXSize = 513;
+    const int terrainYSize = 513;
+
     osg::ref_ptr<osgTerrain::Locator> Locator1 = new osgTerrain::Locator;
     Locator1->setCoordinateSystemType( osgTerrain::Locator::PROJECTED );
-    Locator1->setTransformAsExtents( 0.0, 0.0, 2560.0, 2560.0 );
+    Locator1->setTransformAsExtents( 0.0, 0.0, terrainXSize * 10.0, terrainYSize * 10.0 );
 
     osg::ref_ptr<osg::HeightField> heightmap1 = new osg::HeightField;
-    heightmap1 -> allocate(256,256);
+    heightmap1 -> allocate(terrainXSize, terrainYSize);
     heightmap1 -> setXInterval(10.0f);
     heightmap1 -> setYInterval(10.0f);
-    for(int z=0; z<256; z++)
+    for(int z=0; z<terrainYSize; z++)
     {
-        for(int x=0; x<256; x++)
+        for(int x=0; x<terrainXSize; x++)
         {
             heightmap1->setHeight( x, z, (float)*img->data( x, z ) );
         }
