@@ -123,7 +123,12 @@ public:
                 }
                 else if (ea.getKey() == osgGA::GUIEventAdapter::KEY_Up)
                 {
-                    _manipulator -> moveForward(50.);
+                    double step = 50.;
+                    if (ea.getModKeyMask() && osgGA::GUIEventAdapter::MODKEY_SHIFT == osgGA::GUIEventAdapter::MODKEY_SHIFT)
+                    {
+                        step = 100.;
+                    }
+                    _manipulator -> moveForward(step);
                 }
                 else if (ea.getKey() == osgGA::GUIEventAdapter::KEY_Down)
                 {
