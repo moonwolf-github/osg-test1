@@ -39,7 +39,7 @@
 
 #include <osgDB/ReadFile>
 
-class t : public osgGA::FirstPersonManipulator
+class WalkingManipulator : public osgGA::FirstPersonManipulator
 {
 public:
     void moveForward( const double distance )
@@ -88,7 +88,7 @@ T* findTopMostNodeOfType(osg::Node* node)
 class TerrainHandler : public osgGA::GUIEventHandler {
 public:
 
-    TerrainHandler(osgTerrain::Terrain* terrain, t* manipulator):
+    TerrainHandler(osgTerrain::Terrain* terrain, WalkingManipulator* manipulator):
         _terrain(terrain), _manipulator(manipulator) {}
 
     bool handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& aa)
@@ -142,7 +142,7 @@ protected:
     ~TerrainHandler() {}
 
     osg::ref_ptr<osgTerrain::Terrain>  _terrain;
-    osg::ref_ptr<t> _manipulator;
+    osg::ref_ptr<WalkingManipulator> _manipulator;
 };
 
 int main(int argc, char** argv)
@@ -153,7 +153,7 @@ int main(int argc, char** argv)
     osgViewer::Viewer viewer(arguments);
 
     // set up the camera manipulator.
-    osg::ref_ptr<t> manipulator = new t();
+    osg::ref_ptr<WalkingManipulator> manipulator = new WalkingManipulator();
     viewer.setCameraManipulator( manipulator.get() );
 
     // add the state manipulator
