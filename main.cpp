@@ -39,6 +39,15 @@
 
 #include <osgDB/ReadFile>
 
+class t : public osgGA::FirstPersonManipulator
+{
+public:
+    void moveForward( const double distance )
+    {
+        osgGA::FirstPersonManipulator::moveForward(_rotation, distance);
+    }
+};
+
 template<class T>
 class FindTopMostNodeOfTypeVisitor : public osg::NodeVisitor
 {
@@ -79,8 +88,8 @@ T* findTopMostNodeOfType(osg::Node* node)
 class TerrainHandler : public osgGA::GUIEventHandler {
 public:
 
-    TerrainHandler(osgTerrain::Terrain* terrain):
-        _terrain(terrain) {}
+    TerrainHandler(osgTerrain::Terrain* terrain, t* manipulator):
+        _terrain(terrain), _manipulator(manipulator) {}
 
     bool handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& aa)
     {
@@ -112,6 +121,14 @@ public:
                     osg::notify(osg::NOTICE)<<"Vertical scale "<<_terrain->getVerticalScale()<<std::endl;
                     return true;
                 }
+                else if (ea.getKey() == osgGA::GUIEventAdapter::KEY_Up)
+                {
+                    _manipulator -> moveForward(50.);
+                }
+                else if (ea.getKey() == osgGA::GUIEventAdapter::KEY_Down)
+                {
+                    _manipulator -> moveForward(-50.);
+                }
 
                 return false;
             }
@@ -125,6 +142,7 @@ protected:
     ~TerrainHandler() {}
 
     osg::ref_ptr<osgTerrain::Terrain>  _terrain;
+    osg::ref_ptr<t> _manipulator;
 };
 
 int main(int argc, char** argv)
@@ -134,32 +152,9 @@ int main(int argc, char** argv)
     // construct the viewer.
     osgViewer::Viewer viewer(arguments);
 
-    // set up the camera manipulators.
-    {
-        osg::ref_ptr<osgGA::KeySwitchMatrixManipulator> keyswitchManipulator = new osgGA::KeySwitchMatrixManipulator;
-
-        keyswitchManipulator->addMatrixManipulator( '1', "Trackball", new osgGA::TrackballManipulator() );
-        keyswitchManipulator->addMatrixManipulator( '2', "Flight", new osgGA::FlightManipulator() );
-        keyswitchManipulator->addMatrixManipulator( '3', "Drive", new osgGA::DriveManipulator() );
-        keyswitchManipulator->addMatrixManipulator( '4', "Terrain", new osgGA::TerrainManipulator() );
-
-        std::string pathfile;
-        char keyForAnimationPath = '5';
-        while (arguments.read("-p",pathfile))
-        {
-            osgGA::AnimationPathManipulator* apm = new osgGA::AnimationPathManipulator(pathfile);
-            if (apm || !apm->valid())
-            {
-                unsigned int num = keyswitchManipulator->getNumMatrixManipulators();
-                keyswitchManipulator->addMatrixManipulator( keyForAnimationPath, "Path", apm );
-                keyswitchManipulator->selectMatrixManipulator(num);
-                ++keyForAnimationPath;
-            }
-        }
-
-        viewer.setCameraManipulator( keyswitchManipulator.get() );
-    }
-
+    // set up the camera manipulator.
+    osg::ref_ptr<t> manipulator = new t();
+    viewer.setCameraManipulator( manipulator.get() );
 
     // add the state manipulator
     viewer.addEventHandler( new osgGA::StateSetManipulator(viewer.getCamera()->getOrCreateStateSet()) );
@@ -248,7 +243,7 @@ int main(int argc, char** argv)
     terrain->setBlendingPolicy(blendingPolicy);
 
     // register our custom handler for adjust Terrain settings
-    viewer.addEventHandler(new TerrainHandler(terrain.get()));
+    viewer.addEventHandler(new TerrainHandler(terrain.get(), manipulator.get()));
 
     // add a viewport to the viewer and attach the scene graph.
     viewer.setSceneData( rootnode.get() );
