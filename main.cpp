@@ -187,7 +187,7 @@ int main(int argc, char** argv)
     }
 
     osg::ref_ptr<osg::Node> rootnode = new osg::Node;
-    osg::Image* img = osgDB::readImageFile("terrain.png");
+    osg::ref_ptr<osg::Image> img = osgDB::readImageFile("terrain.png");
 
     const int terrainXSize = 513;
     const int terrainYSize = 513;
@@ -204,7 +204,7 @@ int main(int argc, char** argv)
     {
         for(int x=0; x<terrainXSize; x++)
         {
-            heightmap1->setHeight( x, z, (float)*img->data( x, z ) );
+            heightmap1->setHeight( x, z, (float)*img.get()->data( x, z ) );
         }
     }
 
