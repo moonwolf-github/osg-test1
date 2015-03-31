@@ -194,8 +194,8 @@ int main(int argc, char** argv)
     osg::ref_ptr<osg::Node> rootnode = new osg::Node;
     osg::ref_ptr<osg::Image> img = osgDB::readImageFile("terrain.png");
 
-    const int terrainXSize = 513;
-    const int terrainYSize = 513;
+    const int terrainXSize = img.get() -> s();
+    const int terrainYSize = img.get() -> t();
 
     osg::ref_ptr<osgTerrain::Locator> Locator1 = new osgTerrain::Locator;
     Locator1->setCoordinateSystemType( osgTerrain::Locator::PROJECTED );
