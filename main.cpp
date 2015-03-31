@@ -41,10 +41,59 @@
 
 class WalkingManipulator : public osgGA::FirstPersonManipulator
 {
-public:
-    void moveForward( const double distance )
+protected:
+    /*bool performMovementLeftMouseButton( const double eventTimeDelta, const double dx, const double dy )
     {
-        osgGA::FirstPersonManipulator::moveForward(_rotation, distance);
+        // world up vector
+        CoordinateFrame coordinateFrame = getCoordinateFrame( _eye );
+        Vec3d localUp = getUpVector( coordinateFrame );
+        rotateYawPitch( _rotation, dx, dy, localUp );
+        return true;
+    }*/
+
+    /*void applyAnimationStep( const double currentProgress, const double prevProgress )
+    {
+        osgGA::FirstPersonManipulator::applyAnimationStep(currentProgress, prevProgress);
+    }*/
+    bool handleMouseMove( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us )
+    {
+        return false;
+    }
+    bool handleMousePush( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us )
+    {
+        if (ea.getButton() == osgGA::GUIEventAdapter::RIGHT_MOUSE_BUTTON)
+        {
+            double step = 50.;
+            if (ea.getModKeyMask() && osgGA::GUIEventAdapter::MODKEY_SHIFT == osgGA::GUIEventAdapter::MODKEY_SHIFT)
+            {
+                step = 100.;
+            }
+            moveForward(step);
+            setAcceleration(DBL_MAX);
+            setVelocity(step);
+            return true;
+        }
+        return false;
+    }
+    virtual bool handleKeyDown( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us )
+    {
+        if (ea.getKey() == osgGA::GUIEventAdapter::KEY_Up)
+        {
+            double step = 50.;
+            if (ea.getModKeyMask() && osgGA::GUIEventAdapter::MODKEY_SHIFT == osgGA::GUIEventAdapter::MODKEY_SHIFT)
+            {
+                step = 100.;
+            }
+            moveForward(step);
+            return true;
+        }
+        else if (ea.getKey() == osgGA::GUIEventAdapter::KEY_Down)
+        {
+            moveForward(-50.);
+            return true;
+        }
+
+        return false;
     }
 };
 
@@ -83,46 +132,6 @@ T* findTopMostNodeOfType(osg::Node* node)
 
     return fnotv._foundNode;
 }
-
-// class to handle camera events
-class CameraHandler : public osgGA::GUIEventHandler
-{
-public:
-    CameraHandler(WalkingManipulator* manipulator):
-        _manipulator(manipulator) {}
-
-    bool handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& aa)
-    {
-        switch(ea.getEventType())
-        {
-            case(osgGA::GUIEventAdapter::KEYDOWN):
-            {
-                if (ea.getKey() == osgGA::GUIEventAdapter::KEY_Up)
-                {
-                    double step = 50.;
-                    if (ea.getModKeyMask() && osgGA::GUIEventAdapter::MODKEY_SHIFT == osgGA::GUIEventAdapter::MODKEY_SHIFT)
-                    {
-                        step = 100.;
-                    }
-                    _manipulator -> moveForward(step);
-                }
-                else if (ea.getKey() == osgGA::GUIEventAdapter::KEY_Down)
-                {
-                    _manipulator -> moveForward(-50.);
-                }
-
-                return false;
-            }
-            default:
-                return false;
-        }
-    }
-protected:
-
-    ~CameraHandler() {}
-
-    osg::ref_ptr<WalkingManipulator> _manipulator;
-};
 
 // class to handle events with a pick
 class TerrainHandler : public osgGA::GUIEventHandler {
@@ -275,9 +284,6 @@ int main(int argc, char** argv)
 
     // register our custom handler for adjust Terrain settings
     viewer.addEventHandler(new TerrainHandler(terrain.get()));
-
-    // register our custom handler for camera manipulations
-    viewer.addEventHandler(new CameraHandler(manipulator.get()));
 
     // add a viewport to the viewer and attach the scene graph.
     viewer.setSceneData( rootnode.get() );
