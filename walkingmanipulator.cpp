@@ -110,6 +110,26 @@ bool WalkingManipulator::handleFrame( const osgGA::GUIEventAdapter& ea, osgGA::G
             moveForward(-20);
         }
         return true;
+    case STRAFE_RIGHT:
+        if (running)
+        {
+            moveRight(80);
+        }
+        else
+        {
+            moveRight(20);
+        }
+        return true;
+    case STRAFE_LEFT:
+        if (running)
+        {
+            moveRight(-80);
+        }
+        else
+        {
+            moveRight(-20);
+        }
+        return true;
     default:
         return false;
     }
@@ -135,6 +155,28 @@ void WalkingManipulator::moveForward( const double distance )
     t.w() /= mag;*/
 
     _eye += _rotation * osg::Vec3d( 0., 0., -distance );
+}
+
+void WalkingManipulator::moveRight( const double distance )
+{
+    osg::Vec3d cameraForward;
+    double angle;
+    _rotation.getRotate(angle, cameraForward);
+    cameraForward = _rotation * osg::Vec3d(0.,1.,0.);
+    /*cameraForward.x() = 1.;
+    cameraForward.y() = 0.;
+    cameraForward.z() = 0.;*/
+    std::cout << "angle: " << angle << " vec.x: " << cameraForward.x() << " vec.y: " << cameraForward.y() << " vec.z: " << cameraForward.z() << std::endl;
+
+    osg::Quat t = osg::Quat(angle, cameraForward);
+    std::cout << "x: " << t.x() << " y: " << t.y() << " z: " << t.z() << " w: " << t.w() << std::endl;
+    /*t.x() = 0.707107;
+    t.z() = 0;
+    double mag = sqrt(t.y()*t.y() + t.w()*t.w());
+    t.y() /= mag;
+    t.w() /= mag;*/
+
+    _eye += _rotation * osg::Vec3d( distance, 0., 0. );
 }
 
 bool WalkingManipulator::handleMouseMove( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us )
@@ -196,7 +238,12 @@ bool WalkingManipulator::handleKeyDown( const osgGA::GUIEventAdapter& ea, osgGA:
     }
     else if (ea.getKey() == osgGA::GUIEventAdapter::KEY_Right)
     {
-        state = WALK_BACKWARD;
+        state = STRAFE_RIGHT;
+        return true;
+    }
+    else if (ea.getKey() == osgGA::GUIEventAdapter::KEY_Left)
+    {
+        state = STRAFE_LEFT;
         return true;
     }
     return false;
@@ -211,6 +258,16 @@ bool WalkingManipulator::handleKeyUp( const osgGA::GUIEventAdapter& ea, osgGA::G
         return true;
     }
     else if (ea.getKey() == osgGA::GUIEventAdapter::KEY_Down)
+    {
+        state = STAND;
+        return true;
+    }
+    else if (ea.getKey() == osgGA::GUIEventAdapter::KEY_Right)
+    {
+        state = STAND;
+        return true;
+    }
+    else if (ea.getKey() == osgGA::GUIEventAdapter::KEY_Left)
     {
         state = STAND;
         return true;

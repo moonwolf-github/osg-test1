@@ -118,6 +118,7 @@ protected:
     }*/
 
     void moveForward( const double distance );
+    void moveRight( const double distance );
 
     /*void applyAnimationStep( const double currentProgress, const double prevProgress )
     {
